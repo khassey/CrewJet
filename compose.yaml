@@ -1,0 +1,12 @@
+﻿services:
+  CrewJet.Client:
+    image: crewjet.client
+    build:
+      context: .
+      dockerfile: CrewJet.Client/Dockerfile
+
+  crewjet.server:
+    image: crewjet.server
+    build:
+      context: .
+      dockerfile: CrewJet.Server/Dockerfile

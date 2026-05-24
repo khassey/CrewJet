@@ -1,0 +1,41 @@
+﻿# User-Specific Files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+# IDE-Specific Files (JetBrains Rider)
+idea/
+_ReSharper*/
+*.DotSettings
+# Build Results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug*/
+[Rr]elease*/
+artifacts/
+# Logs and Temporary Files
+*.log
+*.tmp
+*.pidb
+*.svclog
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+# Publish and Deployment Files
+publish/
+*.publishproj
+*.pubxml
+*.appx*
+csx/
+# OS-Specific Files
+DS_Store
+Thumbs.db
+# Rider-Specific Shared Configurations (Optional)
+!.idea/modules.xml
+!.idea/libraries/
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
