@@ -21,4 +21,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CrewJet.Shared\CrewJet.Shared.csproj" />
+    </ItemGroup>
+
 </Project>

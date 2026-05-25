@@ -45,15 +45,16 @@ This document holds the longer-form roadmap and modeling notes that don't need t
 ## Critter Stack Early Foundations Checklist
 
 ### Phase 1 — Core Infrastructure (Weeks 1–3)
-- [ ] Wolverine + Marten setup (transactional outbox, multi-tenancy)
-- [ ] Tenant resolution middleware + authentication pipeline
-- [ ] Vertical Slice structure and naming conventions
+- [x] Wolverine + Marten setup (transactional outbox, multi-tenancy) *(Marten multi-tenancy complete; full Wolverine coming soon)*
+- [x] Tenant resolution middleware + authentication pipeline
+- [x] Vertical Slice structure and naming conventions
 - [ ] Tailwind + base Blazor component library + action button styling
 
 ### Phase 2 — Domain & Modeling Standards (Weeks 2–5)
 - [ ] Aggregate / Decider pattern standards (Event Sourcing for critical modules only)
 - [ ] CQRS command/query/handler conventions
 - [ ] Ubiquitous Language glossary
+- [ ] Evolve toward direct Marten usage with Wolverine commands/handlers for user operations *(new)*
 
 ### Phase 3 — Quality & Observability
 - [ ] Observability, correlation IDs
@@ -119,4 +120,5 @@ This document holds the longer-form roadmap and modeling notes that don't need t
 
 ## Current Phase
 
-Early foundation stage. Priority: solid multi-tenant authentication, core infrastructure (Wolverine + Marten), Tailwind-based UI system (with consistent orange action styling), and the first high-value Job vertical slice.
+**Early foundation stage — Phase 1 mostly complete.**  
+Priority now: Finish UI Foundations (Tailwind + dark theme + orange action styling), then begin the first high-value **Job** vertical slice.

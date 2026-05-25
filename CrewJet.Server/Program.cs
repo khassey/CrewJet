@@ -1,8 +1,13 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using CrewJet.Server.Components;
 using CrewJet.Server.Components.Account;
 using CrewJet.Server.Data;
+using CrewJet.Server.Features.Identity.Claims;
+using CrewJet.Server.Features.Identity.Persistence;
+using CrewJet.Server.Features.Identity.Services;
+using CrewJet.Server.Features.Identity.TenantResolution;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +47,14 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+// CrewUser identity pipeline (Marten-backed multi-tenant document store).
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTenantResolution(builder.Configuration);
+builder.Services.AddCrewJetMarten(builder.Configuration, builder.Environment);
+builder.Services.AddScoped<ICrewUserStore, MartenCrewUserStore>();
+builder.Services.AddScoped<UserLinkingService>();
+builder.Services.AddTransient<IClaimsTransformation, CrewUserClaimsTransformer>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,6 +71,12 @@ else
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+
+app.UseTenantResolution();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseAntiforgery();
 

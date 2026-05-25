@@ -6,9 +6,11 @@
     <File Path=".gitignore" />
     <File Path="CLAUDE.md" />
     <File Path="compose.yaml" />
+    <File Path="docker-compose.yaml" />
     <File Path="Docs/ROADMAP.md" />
     <File Path="README.md" />
   </Folder>
   <Project Path="CrewJet.Client/CrewJet.Client.csproj" />
   <Project Path="CrewJet.Server/CrewJet.Server.csproj" />
+  <Project Path="CrewJet.Shared/CrewJet.Shared.csproj" />
 </Solution>

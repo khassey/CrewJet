@@ -105,7 +105,7 @@ else
             return;
         }
 
-        if (!string.IsNullOrEmpty(Input.Error))
+        if (!string.IsNullOrEmpty(Input!.Error))
         {
             RedirectManager.RedirectToCurrentPageWithStatus($"Error: {Input.Error}", HttpContext);
             return;
