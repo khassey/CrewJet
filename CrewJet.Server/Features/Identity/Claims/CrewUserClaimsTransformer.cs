@@ -11,7 +11,7 @@ namespace CrewJet.Server.Features.Identity.Claims;
 
 public sealed class CrewUserClaimsTransformer(
     ICrewUserStore store,
-    UserManager<ApplicationUser> userManager,
+    //UserManager<ApplicationUser> userManager,
     UserLinkingService userLinkingService,
     ITenantContext tenantContext,
     IHttpContextAccessor httpContextAccessor,
@@ -76,9 +76,10 @@ public sealed class CrewUserClaimsTransformer(
 
         // Lazy provision: principal is authenticated but no CrewUser exists yet.
         // Happens on the first authenticated request after a successful sign-in.
-        var identityUser = await userManager.FindByIdAsync(externalId);
-        if (identityUser is null) return null;
+        // var identityUser = await userManager.FindByIdAsync(externalId);
+        // if (identityUser is null) return null;
 
-        return await userLinkingService.GetOrCreateCrewUserAsync(identityUser);
+        //return await userLinkingService.GetOrCreateCrewUserAsync(identityUser);
+        return null;
     }
 }
