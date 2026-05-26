@@ -1,4 +1,6 @@
-namespace CrewJet.Server.Features.Identity.TenantResolution;
+using Microsoft.AspNetCore.Http;
+
+namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
 /// Strategy for determining the TenantId of an incoming request. Implementations

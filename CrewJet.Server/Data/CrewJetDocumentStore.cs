@@ -1,7 +1,9 @@
-using CrewJet.Server.Features.Identity.TenantResolution;
+using CrewJet.Shared.Features.Identity.TenantResolution;
 using JasperFx;
 using Marten;
-using Weasel.Core;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace CrewJet.Server.Data;
 

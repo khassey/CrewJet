@@ -1,10 +1,6 @@
 using CrewJet.Server.Components;
 using CrewJet.Server.Data;
-using CrewJet.Server.Features.Identity.Claims;
-using CrewJet.Server.Features.Identity.Persistence;
-using CrewJet.Server.Features.Identity.Services;
-using CrewJet.Server.Features.Identity.TenantResolution;
-using Microsoft.AspNetCore.Authentication;
+using CrewJet.Shared.Features.Identity.TenantResolution;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,16 +9,12 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 // === Core foundations ===
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddTenantResolution(builder.Configuration);
 builder.Services.AddCrewJetMarten(builder.Configuration, builder.Environment);
-
-// TODO: Remove these after cleanup is complete (old hybrid identity code)
-builder.Services.AddScoped<ICrewUserStore, MartenCrewUserStore>();
-builder.Services.AddScoped<UserLinkingService>();
-builder.Services.AddTransient<IClaimsTransformation, CrewUserClaimsTransformer>();
-
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -40,10 +32,10 @@ else
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-app.UseTenantResolution(); // Keep - very important
+app.UseTenantResolution();
 
 app.UseRouting();
-app.UseAuthentication(); // Keep for now (will be reconfigured)
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery();

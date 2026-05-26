@@ -7,7 +7,7 @@ public record CrewUserDto(
     string FirstName,
     string LastName,
     string DisplayName,
-    UserProvider AuthProvider,
+    IdentityProvider AuthProvider,
     bool IsActive,
     string? EmployeeNumber,
     string? Phone,

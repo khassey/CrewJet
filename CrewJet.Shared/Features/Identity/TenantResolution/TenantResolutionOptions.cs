@@ -1,4 +1,4 @@
-namespace CrewJet.Server.Features.Identity.TenantResolution;
+namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
 /// Configuration for tenant resolution. Bound from the <c>Tenant</c> section.

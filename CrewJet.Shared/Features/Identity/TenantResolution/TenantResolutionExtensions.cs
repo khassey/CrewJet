@@ -1,4 +1,8 @@
-namespace CrewJet.Server.Features.Identity.TenantResolution;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
 /// Composition root helpers for tenant resolution. Call

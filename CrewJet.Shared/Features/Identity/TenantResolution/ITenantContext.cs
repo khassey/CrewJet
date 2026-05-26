@@ -1,4 +1,4 @@
-namespace CrewJet.Server.Features.Identity.TenantResolution;
+namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
 /// Per-request holder for the active <c>TenantId</c>, populated by

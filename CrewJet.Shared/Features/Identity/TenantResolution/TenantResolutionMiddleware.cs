@@ -1,11 +1,12 @@
-namespace CrewJet.Server.Features.Identity.TenantResolution;
+using Microsoft.AspNetCore.Http;
+
+namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
 /// Resolves the active tenant for each request and stores the result in both
 /// <see cref="ITenantContext"/> (for DI consumers) and
 /// <see cref="HttpContext.Items"/> (for components that prefer direct context access).
-/// Must run BEFORE <c>UseAuthentication</c> so the claims transformer and any
-/// tenant-scoped Marten session see the correct tenant.
+/// Must run BEFORE <c>UseAuthentication</c> so tenant-scoped Marten sessions see the correct tenant.
 /// </summary>
 public sealed class TenantResolutionMiddleware(RequestDelegate next)
 {

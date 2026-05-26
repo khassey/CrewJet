@@ -1,0 +1,71 @@
+﻿@page "/Error/{statusCode:int?}"
+
+@using System.Diagnostics
+
+<PageTitle>Error</PageTitle>
+
+<div class="error-page">
+    <h1 class="text-danger">
+        @if (StatusCode == 404)
+        {
+            <text>Page Not Found</text>
+        }
+        else if (StatusCode == 403)
+        {
+            <text>Access Denied</text>
+        }
+        else
+        {
+            <text>Error</text>
+        }
+    </h1>
+
+    <h2 class="text-danger">
+        @if (StatusCode == 404)
+        {
+            <text>The page you're looking for doesn't exist.</text>
+        }
+        else
+        {
+            <text>An error occurred while processing your request.</text>
+        }
+    </h2>
+
+    @if (ShowRequestId)
+    {
+        <p>
+            <strong>Request ID:</strong> <code>@RequestId</code>
+        </p>
+    }
+
+    @if (StatusCode == 404)
+    {
+        <a href="/" class="btn btn-primary">Go to Home</a>
+    }
+    else
+    {
+        <a href="/" class="btn btn-primary">Return to Home</a>
+    }
+</div>
+
+@code {
+    [Parameter] 
+    public int? StatusCode { get; set; }
+
+    [CascadingParameter] 
+    private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized()
+    {
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+        
+        // If status code wasn't passed in route, try to get it from context
+        if (StatusCode == null && HttpContext != null)
+        {
+            StatusCode = HttpContext.Response.StatusCode;
+        }
+    }
+}

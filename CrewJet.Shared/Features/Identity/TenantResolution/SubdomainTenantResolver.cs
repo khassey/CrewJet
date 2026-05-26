@@ -1,6 +1,7 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace CrewJet.Server.Features.Identity.TenantResolution;
+namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
 /// Resolves the active <c>TenantId</c> from the request's host header by extracting the
@@ -37,13 +38,18 @@ public sealed class SubdomainTenantResolver(IOptions<TenantResolutionOptions> op
         if (string.IsNullOrWhiteSpace(host))
             return devDefault;
 
-        // Less than 3 labels = no real subdomain (localhost, apex domain, raw IP).
-        var labels = host.Split('.');
+        host = host.Trim().TrimEnd('.');
+
+        // Less than 3 labels = no real subdomain: localhost, apex domain, raw IP, etc.
+        var labels = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
 
         if (labels.Length < 3)
             return devDefault;
 
         var first = labels[0];
-        return string.IsNullOrWhiteSpace(first) ? devDefault : first.ToLowerInvariant();
+
+        return string.IsNullOrWhiteSpace(first)
+            ? devDefault
+            : first.ToLowerInvariant();
     }
 }

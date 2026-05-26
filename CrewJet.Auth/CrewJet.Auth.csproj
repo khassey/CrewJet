@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CrewJet.Shared\CrewJet.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Marten.AspNetCore" Version="9.0.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+      <PackageReference Include="OpenIddict.Abstractions" Version="7.5.0" />
+      <PackageReference Include="OpenIddict.AspNetCore" Version="7.5.0" />
+      <PackageReference Include="OpenIddict.Client" Version="7.5.0" />
+      <PackageReference Include="OpenIddict.Client.AspNetCore" Version="7.5.0" />
+      <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="7.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Account\Layouts\AuthLayout.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\ForgotPassword.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Login.razor" />
+      <_ContentIncludedByDefault Remove="Components\Account\Pages\Register.razor" />
+    </ItemGroup>
+
+</Project>
