@@ -1,0 +1,80 @@
+@page "/"
+
+@using System.Security.Claims
+@using CrewJet.Shared.Features.Identity.TenantResolution
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>CrewJet — Workspace</PageTitle>
+
+<div class="login-page">
+    <div class="login-container" style="max-width: 640px; text-align: left;">
+        <h1>Welcome to CrewJet</h1>
+        <p class="subtitle">You're signed in. Below is the identity and tenant context for this session.</p>
+
+        <AuthorizeView>
+            <Authorized>
+                @{
+                    var user = context.User;
+
+                    var subject = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                                  ?? user.FindFirst("sub")?.Value
+                                  ?? "(unknown)";
+
+                    var email = user.FindFirst(ClaimTypes.Email)?.Value ?? "(no email)";
+                    var name = user.Identity?.Name ?? "(no name)";
+                    var tenantClaim = user.FindFirst("tenant_id")?.Value ?? "(none)";
+
+                    var memberships = user
+                        .FindAll(TenantResolutionOptions.TenantMembershipClaimType)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                <h2 style="margin-top: 1.5rem;">User</h2>
+                <dl class="kv">
+                    <dt>Name</dt>
+                    <dd>@name</dd>
+                    <dt>Email</dt>
+                    <dd>@email</dd>
+                    <dt>Subject</dt>
+                    <dd><code>@subject</code></dd>
+                </dl>
+
+                <h2 style="margin-top: 1.5rem;">Tenant</h2>
+                <dl class="kv">
+                    <dt>Active tenant_id claim</dt>
+                    <dd><code>@tenantClaim</code></dd>
+                    <dt>Memberships</dt>
+                    <dd>
+                        @if (memberships.Count == 0)
+                        {
+                            <em>(none on principal)</em>
+                        }
+                        else
+                        {
+                            <ul>
+                                @foreach (var m in memberships)
+                                {
+                                    <li><code>@m</code></li>
+                                }
+                            </ul>
+                        }
+                    </dd>
+                </dl>
+
+                <div style="margin-top: 2rem;">
+                    <form action="/logout" method="post">
+                        <button type="submit" class="btn-primary btn-secondary" style="max-width: 200px;">Sign out
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+            <Authorizing>
+                <p>Loading session…</p>
+            </Authorizing>
+        </AuthorizeView>
+    </div>
+</div>

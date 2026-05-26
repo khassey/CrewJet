@@ -1,27 +1,41 @@
 namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
-/// Per-request holder for the active <c>TenantId</c>, populated by
-/// <see cref="TenantResolutionMiddleware"/> early in the pipeline and consumed by
-/// downstream services (Marten sessions, claims transformation, authorization).
-/// Scoped lifetime: one instance per HTTP request.
+/// The <b>authoritative</b> tenant identity for the current request. Populated
+/// only from the authenticated principal's tenant claim (see the Server-side
+/// <c>AuthenticatedTenantClaimsTransformation</c>). Reading <see cref="TenantId"/>
+/// before the claim is applied throws — that is intentional: it forces every
+/// data-layer caller to either be authenticated or to opt out by reaching for
+/// <see cref="ITenantHint"/> explicitly.
+///
+/// <para>
+/// The Marten session factory consumes this interface. Anonymous endpoints
+/// that resolve <c>IDocumentSession</c> will fail loudly instead of silently
+/// running queries against a subdomain-derived tenant id.
+/// </para>
 /// </summary>
 public interface ITenantContext
 {
     /// <summary>
-    /// The resolved TenantId for the current request. Throws if accessed before
-    /// resolution has run — guard with <see cref="IsResolved"/> if uncertain.
+    /// The authoritative TenantId for the current request, sourced from the
+    /// authenticated principal's <c>tenant_id</c> claim.
+    /// Throws <see cref="InvalidOperationException"/> if no authenticated
+    /// claim has been applied yet (i.e. the request is anonymous, or the
+    /// claims transformation has not run).
     /// </summary>
-    string TenantId { get; }
+    TenantId TenantId { get; }
 
     /// <summary>
-    /// True once <see cref="SetTenantId"/> has been called this request.
+    /// True once an authenticated claim has populated <see cref="TenantId"/>.
+    /// Use this to guard data access in code paths that might be reached
+    /// anonymously (rare — most code should just access <see cref="TenantId"/>).
     /// </summary>
-    bool IsResolved { get; }
+    bool IsAuthenticated { get; }
 
     /// <summary>
-    /// Set the TenantId for this request. Called exactly once per request by
-    /// <see cref="TenantResolutionMiddleware"/>; calling twice throws.
+    /// Called by the claims transformation in CrewJet.Server after OIDC ticket
+    /// receipt mints the cookie. Idempotent: setting the same value twice
+    /// is a no-op; setting a different value throws.
     /// </summary>
-    void SetTenantId(string tenantId);
+    void SetFromAuthenticatedClaim(TenantId tenantId);
 }

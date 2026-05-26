@@ -1,36 +1,69 @@
 namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
-/// Default scoped implementation of <see cref="ITenantContext"/>. Write-once per scope —
-/// reading before <c>SetTenantId</c> throws to surface pipeline-ordering mistakes loudly.
-/// In Blazor Server, the SignalR circuit gets its own DI scope that doesn't see request
-/// middleware; a host-side bridge (e.g. <c>TenantStateBridge</c>) is responsible for
-/// hydrating this context inside the circuit.
+/// Scoped implementation of both <see cref="ITenantContext"/> (the secure,
+/// claim-derived view) and <see cref="ITenantHint"/> (the subdomain hint).
+/// The two interfaces deliberately expose disjoint surfaces:
+///
+/// <list type="bullet">
+///   <item>The Marten session factory and any tenant-isolated code injects
+///         <see cref="ITenantContext"/>; accessing <c>TenantId</c> before the
+///         claims transformation has run throws.</item>
+///   <item>The handful of pre-authentication consumers (routing, OIDC
+///         initiation, <c>/login</c> tenant-existence check) inject
+///         <see cref="ITenantHint"/> instead.</item>
+/// </list>
+///
+/// Both interfaces resolve to the same scoped instance — there is one piece
+/// of per-request state, just two views over it with different trust levels.
 /// </summary>
-public class TenantContext : ITenantContext
+public class TenantContext : ITenantContext, ITenantHint
 {
-    private string? _tenantId;
+    private string? _tenantSubdomainHint;
+    private TenantId? _authenticatedTenantId;
 
-    public string TenantId =>
-        !IsResolved
-            ? throw new InvalidOperationException("TenantId accessed before resolution. Ensure TenantResolutionMiddleware ran for this request.")
-            : _tenantId!;
+    // ----------- ITenantHint (subdomain-derived) -----------
 
-    public bool IsResolved { get; private set; }
+    public string? TenantSubdomain => _tenantSubdomainHint;
+    public bool HasTenantSubdomain => _tenantSubdomainHint is not null;
 
-    public bool IsAdminTenant => TenantId == "admin";
-
-    public void SetTenantId(string tenantId)
+    public void Set(string subdomain)
     {
-        if (IsResolved)
+        if (string.IsNullOrWhiteSpace(subdomain))
+            throw new ArgumentException("Subdomain tenant hint cannot be null or whitespace.", nameof(subdomain));
+
+        if (_tenantSubdomainHint is not null)
         {
-            if (string.Equals(_tenantId, tenantId, StringComparison.Ordinal))
+            if (string.Equals(_tenantSubdomainHint, subdomain, StringComparison.Ordinal))
                 return;
 
-            throw new InvalidOperationException("TenantId already resolved with a different value.");
+            throw new InvalidOperationException("Tenant subdomain hint already set with a different value.");
         }
 
-        _tenantId = tenantId;
-        IsResolved = true;
+        _tenantSubdomainHint = subdomain;
+    }
+
+    // ----------- ITenantContext (authenticated, claim-derived) -----------
+
+    public TenantId TenantId =>
+        _authenticatedTenantId
+        ?? throw new InvalidOperationException(
+            "TenantId accessed without an authenticated tenant claim. " +
+            "Either the request is anonymous, or AuthenticatedTenantClaimsTransformation has not run yet. " +
+            "If you intentionally need the subdomain-derived value, inject ITenantHint instead.");
+
+    public bool IsAuthenticated => _authenticatedTenantId is not null;
+
+    public void SetFromAuthenticatedClaim(TenantId tenantId)
+    {
+        if (_authenticatedTenantId is not null)
+        {
+            if (_authenticatedTenantId == tenantId)
+                return;
+
+            throw new InvalidOperationException("Authenticated tenant already set with a different value.");
+        }
+
+        _authenticatedTenantId = tenantId;
     }
 }

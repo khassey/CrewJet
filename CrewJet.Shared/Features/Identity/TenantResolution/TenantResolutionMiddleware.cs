@@ -3,20 +3,24 @@ using Microsoft.AspNetCore.Http;
 namespace CrewJet.Shared.Features.Identity.TenantResolution;
 
 /// <summary>
-/// Resolves the active tenant for each request and stores the result in both
-/// <see cref="ITenantContext"/> (for DI consumers) and
-/// <see cref="HttpContext.Items"/> (for components that prefer direct context access).
-/// Must run BEFORE <c>UseAuthentication</c> so tenant-scoped Marten sessions see the correct tenant.
+/// Populates <see cref="ITenantHint"/> from the request host at the very start
+/// of the pipeline. This is the <b>pre-authentication</b> hint — it tells
+/// downstream code which subdomain the user is on, NOT which tenant they're
+/// authorized for.
+///
+/// The authoritative tenant (used by the data layer) is set later in the
+/// pipeline by the Server's claims transformation, which writes to
+/// <see cref="ITenantContext"/> after the principal is authenticated.
 /// </summary>
 public sealed class TenantResolutionMiddleware(RequestDelegate next)
 {
     private const string HttpContextItemKey = "TenantId";
 
-    public async Task InvokeAsync(HttpContext context, ITenantResolver resolver, ITenantContext tenantContext)
+    public async Task InvokeAsync(HttpContext context, ITenantResolver resolver, ITenantHint hint)
     {
         var tenantId = await resolver.ResolveAsync(context);
 
-        tenantContext.SetTenantId(tenantId);
+        hint.Set(tenantId);
         context.Items[HttpContextItemKey] = tenantId;
 
         await next(context);

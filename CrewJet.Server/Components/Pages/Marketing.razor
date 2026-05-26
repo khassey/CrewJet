@@ -1,0 +1,35 @@
+@page "/marketing"
+@using Microsoft.AspNetCore.Authorization
+@attribute [AllowAnonymous]
+
+@inject IConfiguration Configuration
+
+<PageTitle>CrewJet — Field Service Management</PageTitle>
+
+@{
+    var authAuthority = Configuration["Auth:Authority"]?.TrimEnd('/') ?? "https://auth.crewjet.test:7025";
+    var signupUrl = $"{authAuthority}/register";
+    var hostFormat = Configuration["App:ServerHostFormat"] ?? "https://{0}.crewjet.io";
+    // Derive the bare workspace-host suffix for the helper text ("your-company.crewjet.io")
+    var sampleHost = string.Format(hostFormat, "your-company");
+    var hostStart = sampleHost.IndexOf("//", StringComparison.Ordinal) + 2;
+    var workspaceHostExample = hostStart > 1 ? sampleHost[hostStart..] : "your-company.crewjet.io";
+}
+
+<div class="marketing-page">
+    <div class="marketing-container">
+        <h1>CrewJet</h1>
+        <p class="tagline">
+            Modern field service management for trades businesses.<br/>
+            Starting with electrical contractors.
+        </p>
+
+        <div class="button-row">
+            <a href="@signupUrl" class="btn-primary">Sign up for free</a>
+        </div>
+
+        <div class="footer-note">
+            Already have an account? Go to your workspace at <strong>@workspaceHostExample</strong>.
+        </div>
+    </div>
+</div>

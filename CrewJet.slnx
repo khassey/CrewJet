@@ -12,6 +12,7 @@
   </Folder>
   <Project Path="CrewJet.Auth/CrewJet.Auth.csproj" />
   <Project Path="CrewJet.Client/CrewJet.Client.csproj" />
+  <Project Path="CrewJet.Mobile/CrewJet.Mobile.csproj" />
   <Project Path="CrewJet.Server/CrewJet.Server.csproj" />
   <Project Path="CrewJet.Shared/CrewJet.Shared.csproj" />
 </Solution>

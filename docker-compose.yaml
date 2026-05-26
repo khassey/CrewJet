@@ -1,4 +1,31 @@
-version: '3.8'
+# =============================================================================
+# CrewJet Local Development - PostgreSQL Support
+# =============================================================================
+# Purpose: Provides the databases needed for local development when running
+#          CrewJet.Auth and CrewJet.Server directly from Rider / dotnet run.
+#
+# Usage:
+#   docker compose -f docker-compose.yaml up -d
+#
+# What this does automatically:
+#   1. Creates BOTH required databases on first run (crewjet + openiddict)
+#      via the init script mounted into /docker-entrypoint-initdb.d
+#   2. Persists data in a named volume (postgres_data)
+#
+# After this is running:
+#   - Run CrewJet.Auth and CrewJet.Server from Rider (or `dotnet run`)
+#   - Auth will automatically apply its EF Core migrations for OpenIddict on startup (Development only)
+#   - Both projects use Marten with AutoCreate.All in Development → schema is created automatically
+#
+# Connection strings (already set in appsettings.Development.json):
+#   CrewJetDatabase  → Host=localhost;Database=crewjet;...
+#   OpenIddictDatabase → Host=localhost;Database=openiddict;...
+#
+# Note: There are two compose files at the root:
+#   - docker-compose.yaml  → THIS file. Use for local DB support.
+#   - compose.yaml         → Builds the containerized app images (CrewJet.Client + CrewJet.Server).
+#     Only use compose.yaml when you want to run the full stack in containers.
+# =============================================================================
 
 services:
   postgres:
@@ -12,6 +39,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Init scripts run automatically on first container startup (when the volume is new).
+      # They never re-run on subsequent starts unless you delete the volume.
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 volumes:

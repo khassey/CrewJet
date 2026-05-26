@@ -1,0 +1,10 @@
+@using CrewJet.Server.Components.Pages
+
+<Router AppAssembly="typeof(Program).Assembly"
+        AdditionalAssemblies="[typeof(Client._Imports).Assembly]"
+        NotFoundPage="typeof(NotFound)">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Client.Layout.MainLayout)"/>
+        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+    </Found>
+</Router>

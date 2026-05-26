@@ -1,0 +1,105 @@
+@page "/login"
+@attribute [AllowAnonymous]
+
+@using System.ComponentModel.DataAnnotations
+@using CrewJet.Auth.Features.Identity
+@using CrewJet.Auth.Features.Identity.Services
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Authorization
+
+@inject LoginService LoginService
+@inject NavigationManager Navigation
+@inject IConfiguration Configuration
+
+<PageTitle>Sign in — CrewJet</PageTitle>
+
+<div class="register-page">
+    <div class="register-container">
+        <h1>Sign in to CrewJet</h1>
+        <p class="subtitle">Use your CrewJet credentials to continue.</p>
+
+        <EditForm Model="Input" method="post" OnValidSubmit="HandleSubmit" FormName="login">
+            <DataAnnotationsValidator/>
+
+            <div class="form-group">
+                <label>Email address</label>
+                <InputText @bind-Value="Input.Email" type="email" class="form-control" autocomplete="username"/>
+                <ValidationMessage For="@(() => Input.Email)"/>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="Input.Password" type="password" class="form-control" autocomplete="current-password"/>
+                <ValidationMessage For="@(() => Input.Password)"/>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <div class="error-box">@_error</div>
+            }
+
+            <button type="submit" class="btn-primary">Sign in</button>
+        </EditForm>
+
+        <p class="terms">
+            Don't have an account? <a href="/register">Create one</a>.
+        </p>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm] private InputModel Input { get; set; } = default!;
+
+    [SupplyParameterFromQuery(Name = "returnUrl")] private string? ReturnUrl { get; set; }
+
+    private string? _error;
+
+    protected override void OnInitialized() => Input ??= new InputModel();
+
+    private async Task HandleSubmit()
+    {
+        var result = await LoginService.VerifyCredentialsAsync(Input.Email, Input.Password);
+
+        if (!result.Success || result.Entry is null)
+        {
+            _error = result.Error ?? "Invalid email or password.";
+            return;
+        }
+
+        var principal = IdentityClaims.CreatePrincipalForUser(result.Entry);
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties { IsPersistent = false });
+
+        Navigation.NavigateTo(ResolveReturnTarget(result.Entry), forceLoad: true);
+    }
+
+    /// <summary>
+    /// Local-URL-only safety check (mitigates open redirects). When there's no
+    /// returnUrl (direct visit) we send the user to their first tenant subdomain,
+    /// which will trigger OIDC and consume the cookie we just set.
+    /// </summary>
+    private string ResolveReturnTarget(Shared.Features.Identity.User entry)
+    {
+        if (!string.IsNullOrWhiteSpace(ReturnUrl)
+            && ReturnUrl.StartsWith('/')
+            && !ReturnUrl.StartsWith("//"))
+        {
+            return ReturnUrl;
+        }
+
+        var hostFormat = Configuration["App:ServerHostFormat"] ?? "https://{0}.crewjet.io";
+        return string.Format(hostFormat, entry.Tenants[0]);
+    }
+
+    public sealed class InputModel
+    {
+        [Required, EmailAddress] public string Email { get; set; } = string.Empty;
+        [Required] public string Password { get; set; } = string.Empty;
+    }
+}

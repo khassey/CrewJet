@@ -13,7 +13,12 @@
 
     <ItemGroup>
       <PackageReference Include="Marten.AspNetCore" Version="9.0.2" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <!-- Sqlite was from early scaffolding. OpenIddictDbContext uses Postgres via Npgsql. -->
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
       <PackageReference Include="OpenIddict.Abstractions" Version="7.5.0" />
       <PackageReference Include="OpenIddict.AspNetCore" Version="7.5.0" />
       <PackageReference Include="OpenIddict.Client" Version="7.5.0" />
